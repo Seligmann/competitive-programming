@@ -4,33 +4,30 @@
 #include <iostream>
 #include <algorithm>
 #include <bits/stdc++.h>
+#include <stack>
 #include <limits.h>
 
 using namespace std;
 
 int main() {
-   int h, w, i = 0;
-   cin >> h >> w;
-   map<int, vector<int>> m;
-   int hclone = h;
+    int n;
+    map<int, vector<int>> v;
+    cin >> n;
+    while (n--) {
+        string str;
+        int sq;
+        cin >> str;
+        sq = sqrt(str.length());
 
-   while (h--) {
-       for (int j = 0; j < w; j++) {
-           int tmp;
-           cin >> tmp;
-           m[i].push_back(tmp);
-       }
-       i++;
-   }
-
-   for (int k = 0; k < w; k++) {
-       for (int j = 0; j < hclone; j++) {
-            if (j != hclone - 1)
-                cout << m[j][k] << ' ';
-            else
-                cout << m[j][k] << '\n';
+        int currChar = 0;
+        for (int i = 0; i < sq; i++) {
+            for (int j = 0; j < sq; j++) {
+                v[i].push_back(str[currChar]);
+                currChar++;
+            }
         }
-   }
+        
 
-
+        
+    }
 }
