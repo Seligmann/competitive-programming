@@ -7,27 +7,26 @@
 #include <stack>
 #include <limits.h>
 
+typedef long long ll;
+
 using namespace std;
 
-int main() {
-    int n;
-    map<int, vector<int>> v;
-    cin >> n;
-    while (n--) {
-        string str;
-        int sq;
-        cin >> str;
-        sq = sqrt(str.length());
+#define MOD 1000000007;
 
-        int currChar = 0;
-        for (int i = 0; i < sq; i++) {
-            for (int j = 0; j < sq; j++) {
-                v[i].push_back(str[currChar]);
-                currChar++;
-            }
-        }
-        
+int f(int n) {
+    if (n < 7)
+        return pow(2, n-1) % MOD;
+    else
+        return (f(n - 1) + f(n - 2) + f(n - 3) + f(n - 4) + f(n - 5) + f(n - 6)) % MOD;
 
-        
-    }
 }
+
+int main() {
+    double x;
+    cin >> x;
+//    vector<int> dpTable(x, -1);
+    cout << f(x) << '\n';
+}
+
+
+
