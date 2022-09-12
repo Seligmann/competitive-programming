@@ -14,62 +14,63 @@ void printStr(string& s) {
 	cout << '\n';
 }
 
-// void rec(map<int, set<int>>& groups, int a, int b) {
+int UnionFind(int x, unordered_map<int,int>& link) {
+	while (x != link[x]) {
+		x = link[x];
+	}
 
-	// groups[a].insert(b);
-	// groups[b].insert(a);
+	return x;
+}
 
-	// for (auto it = groups[a].begin(); it != groups[a].end(); it++)
-	// 	rec(groups, b, *it);
+bool same(int a, int b, unordered_map<int,int>& link) {
+	return UnionFind(a, link) == UnionFind(b, link);
+}
 
-	
-// }
+void unite(int a, int b, unordered_map<int,int>& link, unordered_map<int,int>& size) {
+	a = UnionFind(a, link);
+	b = UnionFind(b, link);
+
+	if (size[a] < size[b])
+		swap(a,b);
+
+	size[a] += size[b];
+	link[b] = a;
+}
+
 
 int main () {
+	ios_base::sync_with_stdio(0);
+    cin.tie(0);
+    cout.tie(0);
+
 	int n, q;
 	cin >> n >> q;
 
-	map<int, set<int>> groups;
+	unordered_map<int,int> link;
+	unordered_map<int,int> size;
 
-	for (int i = 1; i <= n; i++)
-		groups[i].insert(i);
+	for (int i = 1; i <= n; i++) {
+		link[i] = i;
+		size[i] = 1;
+	}
 
 	while (q--) {
 		char c;
-		// set<int> seen;
-
 		cin >> c;
 
-		if (c == 't') {			// for (auto it = groups[a].begin(); it != groups[a].end(); it++) {
+		if (c == 't') {
 			int a, b;
 			cin >> a >> b;
 
-			// groups[a].insert(b);
-			// groups[b].insert(a);
-
-			// seen.insert(a);
-			// seen.insert(b);
-
-			for (auto it = groups[a].begin(); it != groups[a].end(); it++) {
-				for (auto itj = groups[b].begin(); itj!=groups[b].end();itj++) {
-					groups[*it].insert(*itj);
-					groups[*itj].insert(*it);
-				}
+			if (!same(a, b, link)) {
+				unite(a, b, link, size);
 			}
-			// rec(groups, a, b);
 
-			// for (auto it = groups[a].begin(); it != groups[a].begin(); it++) {
-			// 	groups[b].insert(*it);
-			// }
-
-			// for (auto it = groups[b].begin(); it != groups[b].begin(); it++) {
-			// 	groups[a].insert(*it);
-			// }
 		} else {
 			int a;
 			cin >> a;
 
-			cout << groups[a].size() << '\n';
+			cout << size[UnionFind(a, link)] << '\n';
 		}
 	}
 

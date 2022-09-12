@@ -20,21 +20,19 @@ int main () {
 
 	cin >> n >> s;
 
-	if (n == 1)
+	if (n == 1) {
+		cout << 1 << '\n';
 		return 0;
+	}
 
-	char c = 'a';
+
+	char c = 'A';
 	for (int i = 0; i < n; i++) {
+		c = (char) (c + i);
 		curr.push_back(c);
-		c = (char) (c + 1);
 	}
 
 	start = curr;
-
-	// even && out -> just iter over each string and interleaf them
-	// odd && out -> first half will have one more card than 2nd half
-	// even && in -> just iter over each string and interleaf them
-	// odd && in -> second half will have onemore card than 1st half
 
 	if (n % 2 == 0) {
 		if (s == "out") {
@@ -50,8 +48,7 @@ int main () {
 
 				count++;
 
-				// printStr(curr);
-			} while (start != curr); // O(logn)?
+			} while (curr.compare(start) != 0); // O(logn)?
 		} else {
 			do {
 				string l = curr.substr(0, n / 2);
@@ -64,7 +61,7 @@ int main () {
 				}
 
 				count++;
-			} while (start != curr);
+			} while (curr.compare(start) != 0);
 		}
 	} else {
 		if (s == "out") {
@@ -73,16 +70,14 @@ int main () {
 				string r = curr.substr(n/2 + 1, n);
 				curr.clear();
 
-				// 0 0 0 0 0
-
 				for (int i = 0; i < n/2; i++) {
 					curr.push_back(l[i]);
 					curr.push_back(r[i]);
 				}
-				curr.push_back(l[n/2]);
+				curr.push_back(l[l.size() - 1]);
 
 				count++;
-			} while (start != curr);
+			} while (curr.compare(start) != 0);
 		} else {
 			do {
 				string l = curr.substr(0, n/2);
@@ -93,10 +88,10 @@ int main () {
 					curr.push_back(r[i]);
 					curr.push_back(l[i]);
 				}
-				curr.push_back(r[n/2]);
+				curr.push_back(r[r.size() - 1]);
 
 				count++;
-			} while (start != curr);
+			} while (curr.compare(start) != 0);
 		}
 	}
 
