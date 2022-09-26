@@ -5,7 +5,7 @@ using namespace std;
 int main () {
 	map<int,int> ans;
 	int c, mx = INT_MIN;
-	set<int> tiles;
+	vector<int> tiles;
 
 	cin >> c;
 
@@ -15,7 +15,7 @@ int main () {
 		cin >> n;
 		mx = max(mx, n);
 
-		tiles.insert(n);
+		tiles.push_back(n);
 	}
 
 	// Get length of hex matrix
