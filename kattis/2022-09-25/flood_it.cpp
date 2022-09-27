@@ -17,109 +17,72 @@ void logger(std::string vars, Args&&... values) {
 
 using namespace std;
 
-int countOcc(int i, int j, int m[][20], int n, set<pair<int,int>>& fillVisited, int& trav, set<pair<int,int>>& occV) {
-    cout << "counting occurences\n";
-    queue<pair<int,int>> q;
-    set<pair<int,int>> v;
-    int cnt = 0, c = m[i][j];
+int countOcc(int i, int j, int c, int n, int m[][20], set<pair<int,int>>& coordsCounted) {
+    set<pair<int, int>> v;
+    queue<pair<int, int>> q;
+    int cnt = 0;
 
-    q.push(make_pair(i,j));
-
-    cout << "matrix before count\n";
-    for (int k = 0; k < n; k++) {
-        for (int l = 0; l < n; l++) {
-            cout << m[k][l];
-        }
-        cout << '\n';
-    }
+    q.push(make_pair(i, j));
 
     while (!q.empty()) {
-        i = q.front().first;
-        j = q.front().second;
-        pair<int,int> p = make_pair(i,j);
+        int ii = q.front().first;
+        int jj = q.front().second;
         q.pop();
-
-        if (m[i][j] != c)
-            continue;
-
-        if (occV.count(p) || v.count(p))
-            return cnt;
-
-        occV.insert(p);
-        v.insert(p);
-
-        // if (v.count(p) || occV.count(p))
-        //     continue;
-
-        // v.insert(p);
-
-        // if (fillVisited.count(p))
-        //     continue;
-
-        // deb(i, j, m[i][j], cnt, trav);
-
-        // if (m[i][j] == c)
-        //     fillVisited.insert(p);
-
-        // if (m[i][j] != c)
-        //     continue;
-
-        cnt++;
-        trav++;
-
-        if (i - 1 >= 0) q.push(make_pair(i - 1, j));
-        if (j + 1 < n) q.push(make_pair(i, j + 1));
-        if (i + 1 < n) q.push(make_pair(i + 1, j));
-        if (j - 1 >= 0) q.push(make_pair(i, j - 1));
-    }
-
-    deb(c, cnt);
-
-    return cnt;
-}
-
-void bfs(int oc, int c, int n, int m[][20], int colorChoiceFreq[7], set<pair<int,int>>& lastFill) {
-    cout << "bfs\n";
-
-    queue<pair<int,int>> q;
-    set<pair<int,int>> v;
-    vector<vector<int>> colorFreqs(7, vector<int>(2));
-    int trav = 0;
-
-    q.push(make_pair(0,0));
-    m[0][0] = c;
-
-    set<pair<int,int>> occV;
-    while (!q.empty()) {
-        int i = q.front().first;
-        int j = q.front().second;
-        pair<int,int> p = make_pair(i,j);
-        q.pop();
+        pair<int, int> p = make_pair(ii, jj);
 
         if (v.count(p))
             continue;
 
-        if (m[i][j] == oc && lastFill.count(p)) {
-            m[i][j] = c;
-            trav++;
-        }
-
         v.insert(p);
-        // lastFill.insert(p);
 
-        deb(oc, c, i, j, m[i][j]);
-
-        // keep track of # of possible tiles to color for each color
-        if (m[i][j] != c && occV.count(p) == 0) {
-            colorFreqs[m[i][j]][0] = m[i][j];
-            colorFreqs[m[i][j]][1] += countOcc(i, j, m, n, v, trav, occV);
+        if (m[ii][jj] != c) {
+            // cout << "m[ii][jj] != c\n";
+            continue;
         }
 
-        if (m[i][j] != c && m[i][j] != oc)
+        coordsCounted.insert(p);
+
+        cnt++;
+
+        if (ii - 1 >= 0) q.push(make_pair(ii - 1, jj));
+        if (jj + 1 < n) q.push(make_pair(ii, jj + 1));
+        if (ii + 1 < n) q.push(make_pair(ii + 1, jj));
+        if (jj - 1 >= 0) q.push(make_pair(ii, jj - 1));
+    }
+
+    return cnt;
+}
+
+void bfs(int oc, int c, int m[][20], int n, vector<int>& colorChoiceFreqs, set<pair<int, int>>& prevFill) {
+    set<pair<int,int>> v;
+    queue<pair<int,int>> q;
+    unordered_map<int, vector<pair<int, int>>> colorToPos;
+
+    q.push(make_pair(0,0));
+
+    while (!q.empty()) {
+        int i = q.front().first;
+        int j = q.front().second;
+        q.pop();
+        pair<int, int> p = make_pair(i, j);
+
+        if (v.count(p))
             continue;
+        v.insert(p);
 
-
-        lastFill.insert(p);
+        // filling
+        if (m[i][j] == oc && (oc == c || prevFill.count(p))) { // filling tiles w/ previous best color choice w/ new color choice
+            // cout << "filled " << m[i][j] << " at " << i << ',' << j << " with " << c << '\n';
+            m[i][j] = c;
+            prevFill.insert(p);
+        } else if (m[i][j] == c) { // filling tiles that are best color choice
+            // cout << "filled " << m[i][j] << " at " << i << ',' << j << " with " << c << '\n';
+            prevFill.insert(p);
+        } else {
+            // cout << "found bordering tile color " << m[i][j] << " at " << i << ',' << j << '\n';
+            colorToPos[m[i][j]].push_back(p);
+            continue;
+        }
 
         if (i - 1 >= 0) q.push(make_pair(i - 1, j));
         if (j + 1 < n) q.push(make_pair(i, j + 1));
@@ -127,43 +90,48 @@ void bfs(int oc, int c, int n, int m[][20], int colorChoiceFreq[7], set<pair<int
         if (j - 1 >= 0) q.push(make_pair(i, j - 1));
     }
 
-    cout << "matrix\n";
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            cout << m[i][j];
+    set<pair<int, int>> coordsCounted;
+    vector<vector<int>> colorFreqs(7, vector<int>(2));
+
+    // iter through coordinates of tiles on edge of last fill to find how many more tiles each color choice yields
+    for (auto it = colorToPos.begin(); it != colorToPos.end(); it++) {
+        colorFreqs[it->first][0] = it->first;
+
+        for (int k = 0; k < it->second.size(); k++) {
+            int row = it->second[k].first;
+            int col = it->second[k].second;
+
+            if (coordsCounted.count(make_pair(row, col)))
+                continue;
+
+            colorFreqs[it->first][1] += countOcc(row, col, it->first, n, m, coordsCounted);
         }
-        cout << '\n';
+        
+        // deb(it->first, colorFreqs[it->first][1]);
     }
 
+    // find best choice for next fill
     sort(colorFreqs.begin(), colorFreqs.end(), [](const vector<int>& v1, const vector<int>& v2) { return v1[1] > v2[1]; });
-    cout << "color freqs:\n";
-    for (auto& v: colorFreqs)
-        deb(v[0], v[1]);
-
-    if (colorFreqs[0][0] == 0 && colorFreqs[0][1] == 0 || (trav == n * n))
-        return;
-
 
     int mnColor = colorFreqs[0][0];
     int mxFreq = colorFreqs[0][1];
 
-    for (int k = 1; k < colorFreqs.size(); k++) {
-        deb(mnColor, mxFreq);
+    if (mnColor == 0)
+        return;
 
-        if (mxFreq == colorFreqs[k][1])
+    assert(mxFreq > 0);
+
+    for (int k = 1; k < colorFreqs.size(); k++) {
+        if (mxFreq == colorFreqs[k][1]) {
             mnColor = min(mnColor, colorFreqs[k][0]);
-        else {
-            cout << "chose color " << mnColor << '\n';
-            colorChoiceFreq[mnColor]++;
+        } else {
             break;
         }
     }
+    // cout << "chose color " << mnColor << '\n';
+    colorChoiceFreqs[mnColor]++;
 
-    // if (mnColor != oc) // color change is needed
-    //     colorChoiceFreq[mnColor]++;
-
-    bfs(m[0][0], mnColor, n, m, colorChoiceFreq, lastFill);
-
+    bfs(m[0][0], mnColor, m, n, colorChoiceFreqs, prevFill);
 }
 
 int main() {
@@ -176,8 +144,6 @@ int main() {
     while (t--) {
         int n;
         int m[20][20] = {0};
-        int colorChoiceFreq[7] = {0};
-        set<pair<int,int>> lastFill;
         cin >> n;
 
         for (int i = 0; i < n; i++) {
@@ -189,30 +155,17 @@ int main() {
             }
         }
 
-        bfs(m[0][0], m[0][0], n, m, colorChoiceFreq, lastFill);
+        vector<int> colorChoiceFreqs(7, 0);
+        set<pair<int, int>> prevFill;
 
-        int ret = 0;
-        for (int i = 1; i < 7; i++)
-            ret += colorChoiceFreq[i];
+        bfs(m[0][0], m[0][0], m, n, colorChoiceFreqs, prevFill);
 
-        cout << ret << '\n';
-        for (int i = 1; i < 7; i++) {
+        cout << accumulate(colorChoiceFreqs.begin(), colorChoiceFreqs.end(), 0) << '\n';
+        for (int i = 1; i < colorChoiceFreqs.size(); i++) {
             if (i < 6)
-                cout << colorChoiceFreq[i] << ' ';
+                cout << colorChoiceFreqs[i] << ' ';
             else
-                cout << colorChoiceFreq[i] << '\n';
+                cout << colorChoiceFreqs[i] << '\n';
         }
-
     }
-
-    /*
-    1
-    6
-    123423
-    334521
-    433123
-    543621
-    324343
-    234156
-    */
 }
